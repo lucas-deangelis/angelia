@@ -15,11 +15,15 @@
 (test (extract-numbers "(G11) [lorem 52 ipsum] page 12") @[11 52 12])
 (test (extract-numbers "zzzzzzzzzzzzzzzzzzzzzzzzz") @[])
 (test (extract-numbers "Unicode をチェックするクールなテスト") @[])
+(test (map extract-numbers @["14_15" "001.png" "Nothing"]) @[@[14 15] @[1] @[]])
 
 (defn pagebefore [a b &opt n]
     (default n 0)
+    # (print "n is: " n)
     (def x (get a n))
     (def y (get b n))
+    # (print "x is: " x)
+    # (print "y is: " y)
     (cond
         (nil? x) true
         (nil? y) false
@@ -28,11 +32,35 @@
             (pagebefore a b (+ n 1))))
 
 
+(def ta @[@[1] @[2] @[3] @[4] @[5]])
+(each i ta
+    (each j ta
+        (print "i: " i " j: " j " comp: " (pagebefore i j))))
+
 (test (pagebefore @[1] @[2]) true)
 (test (pagebefore @[2] @[1]) false)
+(test (pagebefore @[2] @[3]) true)
+(test (pagebefore @[3] @[4]) true)
+(test (pagebefore @[4] @[5]) true)
 (test (pagebefore @[6 24 2] @[6 24 5]) true)
 (test (pagebefore @[55 2 9 102] @[55 2 8 102]) false)
 (test (pagebefore @[12 20] @[12 20 5]) true)
+
+(defn com [a b]
+    (print "called with " a " " b)
+    (pagebefore
+        (extract-numbers a)
+        (extract-numbers b)))
+
+(test (com "1" "2") true)
+(test (com "2" "1") false)
+(test (com "1" "1") true)
+(test (com "1" "1") true)
+
+(pp (extract-numbers "5"))
+
+(test (sort @["5" "3" "4" "1" "2"] (fn [a b] (com a b))) @[1 2 3 4 5])
+# (test (sorted @["5" "3"] (fn [a b] (= -1 (compare a b)))) @["3" "5"])
 
 (defn main
     [& args]
